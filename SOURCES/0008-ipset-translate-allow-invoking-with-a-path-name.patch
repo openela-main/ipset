@@ -1,0 +1,47 @@
+From a7d1e05c0fcae89fffcd5aa235ea32d16becbd21 Mon Sep 17 00:00:00 2001
+From: Quentin Armitage <quentin@armitage.org.uk>
+Date: Thu, 11 Aug 2022 17:52:18 +0100
+Subject: [PATCH] ipset-translate: allow invoking with a path name
+
+Executing /usr/sbin/ipset-translate results in the ipset functionality being run, rather than the ipset-translate functionality.
+
+ # ipset-translate destroy fred
+ This command is not supported, use `ipset-translate restore < file'
+
+ # /usr/sbin/ipset-translate destroy fred
+ ipset v7.15: The set with the given name does not exist
+
+use basename() to resolve the issue.
+
+Closes: https://bugzilla.netfilter.org/show_bug.cgi?id=1626
+Signed-off-by: Quentin Armitage <quentin@armitage.org.uk>
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit e1b60b2a93356c313cccb2abfdae4b58d530e02b)
+---
+ src/ipset.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/ipset.c b/src/ipset.c
+index 6d42b60d2fe9d..162f477d49cd0 100644
+--- a/src/ipset.c
++++ b/src/ipset.c
+@@ -6,6 +6,7 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  */
++#define _GNU_SOURCE
+ #include <assert.h>			/* assert */
+ #include <stdio.h>			/* fprintf */
+ #include <stdlib.h>			/* exit */
+@@ -31,7 +32,7 @@ main(int argc, char *argv[])
+ 		exit(1);
+ 	}
+ 
+-	if (!strcmp(argv[0], "ipset-translate")) {
++	if (!strcmp(basename(argv[0]), "ipset-translate")) {
+ 		ret = ipset_xlate_argv(ipset, argc, argv);
+ 	} else {
+ 		ret = ipset_parse_argv(ipset, argc, argv);
+-- 
+2.38.0
+

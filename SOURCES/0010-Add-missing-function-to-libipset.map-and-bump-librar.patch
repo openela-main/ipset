@@ -1,0 +1,44 @@
+From 68a945a5c140b3067e90baae3f35441dd8bacf25 Mon Sep 17 00:00:00 2001
+From: Jozsef Kadlecsik <kadlec@netfilter.org>
+Date: Wed, 28 Jul 2021 16:02:49 +0200
+Subject: [PATCH] Add missing function to libipset.map and bump library version
+
+A new function was not added to libipset.map at the previous release,
+fix it. Reported by Jan Engelhardt.
+
+Signed-off-by: Jozsef Kadlecsik <kadlec@netfilter.org>
+(cherry picked from commit 8a0df0c759cf9f0ca6f0cfa512ebf4832fd73729)
+---
+ Make_global.am   | 2 +-
+ lib/libipset.map | 5 +++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Make_global.am b/Make_global.am
+index 3ad7f73b28479..ed92cfec7a207 100644
+--- a/Make_global.am
++++ b/Make_global.am
+@@ -69,7 +69,7 @@
+ # interface. 
+ 
+ #            curr:rev:age
+-LIBVERSION = 15:0:2
++LIBVERSION = 16:0:3
+ 
+ AM_CPPFLAGS = $(kinclude_CFLAGS) $(all_includes) -I$(top_srcdir)/include
+ 
+diff --git a/lib/libipset.map b/lib/libipset.map
+index 12d16a4faf53c..c380f9cde2edc 100644
+--- a/lib/libipset.map
++++ b/lib/libipset.map
+@@ -208,3 +208,8 @@ LIBIPSET_4.10 {
+   ipset_print_hexnumber;
+ } LIBIPSET_4.9;
+ 
++LIBIPSET_4.11 {
++global:
++  ipset_xlate_argv;
++} LIBIPSET_4.10;
++
+-- 
+2.38.0
+

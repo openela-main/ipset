@@ -1,0 +1,44 @@
+From 5f8dc543a936f7f962165977cfb8e9e108659eb5 Mon Sep 17 00:00:00 2001
+From: Pablo Neira Ayuso <pablo@netfilter.org>
+Date: Fri, 25 Jun 2021 22:30:41 +0200
+Subject: [PATCH] lib: Detach restore routine from parser
+
+Do not call restore() from ipset_parser(). Instead, ipset_parser()
+returns the IPSET_CMD_RESTORE command and the caller invokes restore().
+
+This patch comes in preparation for the ipset to nftables translation
+infrastructure.
+
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+Signed-off-by: Jozsef Kadlecsik <kadlec@netfilter.org>
+(cherry picked from commit ff7f000ef2dbe81444a4e204dbab9a2177c35e21)
+---
+ lib/ipset.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/lib/ipset.c b/lib/ipset.c
+index 3077f9793f841..5232d8b76c46f 100644
+--- a/lib/ipset.c
++++ b/lib/ipset.c
+@@ -1231,7 +1231,7 @@ ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
+ 			return ipset->custom_error(ipset,
+ 				p, IPSET_PARAMETER_PROBLEM,
+ 				"Unknown argument %s", argv[1]);
+-		return restore(ipset);
++		return IPSET_CMD_RESTORE;
+ 	case IPSET_CMD_ADD:
+ 	case IPSET_CMD_DEL:
+ 	case IPSET_CMD_TEST:
+@@ -1296,6 +1296,9 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
+ 	if (cmd < 0)
+ 		return cmd;
+ 
++	if (cmd == IPSET_CMD_RESTORE)
++		return restore(ipset);
++
+ 	ret = ipset_cmd(session, cmd, ipset->restore_line);
+ 	D("ret %d", ret);
+ 	/* In the case of warning, the return code is success */
+-- 
+2.38.0
+
