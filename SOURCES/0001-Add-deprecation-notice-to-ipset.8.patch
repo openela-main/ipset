@@ -1,0 +1,48 @@
+From e9398b721855f8fbfb30a21d475d0aeb7f85bbe5 Mon Sep 17 00:00:00 2001
+From: Phil Sutter <psutter@redhat.com>
+Date: Fri, 25 Jun 2021 13:47:57 +0200
+Subject: [PATCH] Add deprecation notice to ipset.8
+
+This is RHEL9 trying to friendly kick people towards nftables.
+---
+ src/ipset.8 | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/src/ipset.8 b/src/ipset.8
+index 97cece9fb04b5..d68e9bbc22891 100644
+--- a/src/ipset.8
++++ b/src/ipset.8
+@@ -51,6 +51,18 @@ COMMANDS := { \fBcreate\fR | \fBadd\fR | \fBdel\fR | \fBtest\fR | \fBdestroy\fR
+ .PP
+ \fBipset\fR \fB\-\fR
+ .SH "DESCRIPTION"
++This tool is
++.B deprecated
++in Red Hat Enterprise Linux. It is maintenance only and will not receive new
++features. New setups should use
++.BR nft (8).
++Existing setups should migrate to
++.BR nft (8)
++when possible. See
++.UR https://red.ht/nft_your_tables
++.UE
++for details.
++.PP
+ \fBipset\fR
+ is used to set up, maintain and inspect so called IP sets in the Linux
+ kernel. Depending on the type of the set, an IP set may store IP(v4/v6)
+@@ -1099,8 +1111,9 @@ Bugs? No, just funny features. :\-)
+ OK, just kidding...
+ .SH "SEE ALSO"
+ \fBiptables\fR(8),
+-\fBip6tables\fR(8)
+-\fBiptables-extensions\fR(8)
++\fBip6tables\fR(8),
++\fBiptables-extensions\fR(8),
++\fBnft\fR(8)
+ .SH "AUTHORS"
+ Jozsef Kadlecsik wrote ipset, which is based on ippool by
+ Joakim Axelsson, Patrick Schaaf and Martin Josefsson.
+-- 
+2.31.1
+

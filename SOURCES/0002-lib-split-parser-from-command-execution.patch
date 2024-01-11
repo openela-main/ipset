@@ -1,0 +1,84 @@
+From c371154c65f7b09aa0582b7ae2f68aaf13113ee1 Mon Sep 17 00:00:00 2001
+From: Pablo Neira Ayuso <pablo@netfilter.org>
+Date: Fri, 25 Jun 2021 22:30:40 +0200
+Subject: [PATCH] lib: split parser from command execution
+
+ipset_parse_argv() parses, builds and send the netlink messages to the
+kernel. This patch extracts the parser and wrap it around the new
+ipset_parser() function.
+
+This patch comes is preparation for the ipset to nftables translation
+infrastructure.
+
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+Signed-off-by: Jozsef Kadlecsik <kadlec@netfilter.org>
+(cherry picked from commit 4dd0a5e5755ec058b78e3bd6da39fe2bb7bbb4f3)
+---
+ lib/ipset.c | 44 ++++++++++++++++++++++++++++++--------------
+ 1 file changed, 30 insertions(+), 14 deletions(-)
+
+diff --git a/lib/ipset.c b/lib/ipset.c
+index 6729919657707..3077f9793f841 100644
+--- a/lib/ipset.c
++++ b/lib/ipset.c
+@@ -923,20 +923,8 @@ static const char *cmd_prefix[] = {
+ 	[IPSET_TEST]   = "test   SETNAME",
+ };
+ 
+-/* Workhorses */
+-
+-/**
+- * ipset_parse_argv - parse and argv array and execute the command
+- * @ipset: ipset structure
+- * @argc: length of the array
+- * @argv: array of strings
+- *
+- * Parse an array of strings and execute the ipset command.
+- *
+- * Returns 0 on success or a negative error code.
+- */
+-int
+-ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
++static int
++ipset_parser(struct ipset *ipset, int oargc, char *oargv[])
+ {
+ 	int ret = 0;
+ 	enum ipset_cmd cmd = IPSET_CMD_NONE;
+@@ -1280,6 +1268,34 @@ ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
+ 	if (argc > 1)
+ 		return ipset->custom_error(ipset, p, IPSET_PARAMETER_PROBLEM,
+ 			"Unknown argument %s", argv[1]);
++
++	return cmd;
++}
++
++/* Workhorses */
++
++/**
++ * ipset_parse_argv - parse and argv array and execute the command
++ * @ipset: ipset structure
++ * @argc: length of the array
++ * @argv: array of strings
++ *
++ * Parse an array of strings and execute the ipset command.
++ *
++ * Returns 0 on success or a negative error code.
++ */
++int
++ipset_parse_argv(struct ipset *ipset, int oargc, char *oargv[])
++{
++	struct ipset_session *session = ipset->session;
++	void *p = ipset_session_printf_private(session);
++	enum ipset_cmd cmd;
++	int ret;
++
++	cmd = ipset_parser(ipset, oargc, oargv);
++	if (cmd < 0)
++		return cmd;
++
+ 	ret = ipset_cmd(session, cmd, ipset->restore_line);
+ 	D("ret %d", ret);
+ 	/* In the case of warning, the return code is success */
+-- 
+2.38.0
+

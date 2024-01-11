@@ -1,0 +1,32 @@
+From ad4513664b99f5913578ee9771836997f88f4c96 Mon Sep 17 00:00:00 2001
+From: "Bernhard M. Wiedemann" <bwiedemann@suse.de>
+Date: Wed, 29 Sep 2021 09:55:43 +0200
+Subject: [PATCH] Fix typo in ipset-translate man page
+
+originally reported in
+https://lists.opensuse.org/archives/list/factory@lists.opensuse.org/thread/ZIXKNQHSSCQ4ZLEGYYKLAXQ4PQ5EYFGZ/
+by Larry Len Rainey
+
+Signed-off-by: Bernhard M. Wiedemann <bwiedemann@suse.de>
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+(cherry picked from commit c74a420471fd693f89e0b0e19f93c88af22fb7de)
+---
+ src/ipset-translate.8 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ipset-translate.8 b/src/ipset-translate.8
+index bb4e737e14806..55ce2a99f2cf2 100644
+--- a/src/ipset-translate.8
++++ b/src/ipset-translate.8
+@@ -33,7 +33,7 @@ to \fBnftables(8)\fP.
+ The only available command is:
+ 
+ .IP \[bu] 2
+-ipset-translate restores < file.ipt
++ipset-translate restore < file.ipt
+ 
+ .SH USAGE
+ The \fBipset-translate\fP tool reads an IP sets file in the syntax produced by
+-- 
+2.38.0
+
