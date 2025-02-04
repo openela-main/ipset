@@ -166,6 +166,3 @@ index 50f86aee045bc..f57b07413cba5 100644
  		fclose(f);
  
  	return ret;
--- 
-2.38.0
-

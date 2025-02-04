@@ -3,7 +3,7 @@
 
 Name:             ipset
 Version:          7.11
-Release:          8%{?dist}
+Release:          11%{?dist}
 Summary:          Manage Linux IP sets
 
 License:          GPLv2
@@ -24,6 +24,7 @@ Patch7:           0007-Fix-IPv6-sets-nftables-translation.patch
 Patch8:           0008-ipset-translate-allow-invoking-with-a-path-name.patch
 Patch9:           0009-Fix-all-debug-mode-warnings.patch
 Patch10:          0010-Add-missing-function-to-libipset.map-and-bump-librar.patch
+Patch11:          0011-Fix-patch-Parse-port-before-trying-by-service-name.patch
 
 BuildRequires:    libmnl-devel
 BuildRequires:    automake
@@ -183,6 +184,15 @@ fi
 
 
 %changelog
+* Tue Nov 26 2024 Phil Sutter <psutter@redhat.com> - 7.11-11
+- Bump release for gated side-tag
+
+* Wed Nov 13 2024 Phil Sutter <psutter@redhat.com> - 7.11-10
+- Fix patch "Parse port before trying by service name"
+
+* Thu Jun 20 2024 Phil Sutter <psutter@redhat.com> - 7.11-9
+- Fix for wrong comment in ipset-config file
+
 * Fri Nov 25 2022 Phil Sutter <psutter@redhat.com> - 7.11-8
 - Ship iptables-translate utility with ipset package
 - Add missing function to libipset.map and bump library version

@@ -43,6 +43,3 @@ index 97cece9fb04b5..d68e9bbc22891 100644
  .SH "AUTHORS"
  Jozsef Kadlecsik wrote ipset, which is based on ippool by
  Joakim Axelsson, Patrick Schaaf and Martin Josefsson.
--- 
-2.31.1
-

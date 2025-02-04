@@ -87,6 +87,3 @@ index 96eba3b0175ea..0152a30811258 100644
  add element inet global bim1 { 1.1.1.1 . aa:bb:cc:dd:ee:ff }
 +add set inet global hn6 { type ipv6_addr; flags interval; }
 +add element inet global hn6 { fe80::/64 }
--- 
-2.38.0
-

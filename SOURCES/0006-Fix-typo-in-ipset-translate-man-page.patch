@@ -27,6 +27,3 @@ index bb4e737e14806..55ce2a99f2cf2 100644
  
  .SH USAGE
  The \fBipset-translate\fP tool reads an IP sets file in the syntax produced by
--- 
-2.38.0
-

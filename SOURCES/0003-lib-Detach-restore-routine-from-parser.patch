@@ -39,6 +39,3 @@ index 3077f9793f841..5232d8b76c46f 100644
  	ret = ipset_cmd(session, cmd, ipset->restore_line);
  	D("ret %d", ret);
  	/* In the case of warning, the return code is success */
--- 
-2.38.0
-
