@@ -1,0 +1,23 @@
+From 21080dc79c4e9244149aa78f6a8f7fbb6f4b8e81 Mon Sep 17 00:00:00 2001
+From: Jozsef Kadlecsik <kadlec@netfilter.org>
+Date: Thu, 6 Jun 2024 08:57:11 +0200
+Subject: [PATCH] Replace BUG_ON() with WARN_ON_ONCE() according to usage
+ policy.
+
+---
+ kernel/net/netfilter/ipset/ip_set_list_set.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/kernel/net/netfilter/ipset/ip_set_list_set.c b/kernel/net/netfilter/ipset/ip_set_list_set.c
+index fd78e2db06e4f..0d3e5a7331f26 100644
+--- a/kernel/net/netfilter/ipset/ip_set_list_set.c
++++ b/kernel/net/netfilter/ipset/ip_set_list_set.c
+@@ -432,7 +432,7 @@ list_set_destroy(struct ip_set *set)
+ {
+ 	struct list_set *map = set->data;
+ 
+-	BUG_ON(!list_empty(&map->members));
++	WARN_ON_ONCE(!list_empty(&map->members));
+ 	kfree(map);
+ 
+ 	set->data = NULL;

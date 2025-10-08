@@ -1,0 +1,354 @@
+From 5c9ef9016d2781f6e07a544e34ec9f4a8d65d0e2 Mon Sep 17 00:00:00 2001
+From: Phil Sutter <phil@nwl.cc>
+Date: Thu, 27 Jun 2024 10:18:18 +0200
+Subject: [PATCH] tests: Reduce testsuite run-time
+
+Where acceptable, batch add set element calls to avoid overhead of
+excessive 'ipset' program spawns. On my (slow) testing VM, this patch
+reduces a full run of tests/runtest.sh from ~70min down to ~11min.
+
+This might eliminate the situation being tested: resize.sh might be such
+a case so batch only 255 'ipset add' calls and continue to repeat these
+batched calls 32 times in hopes that it still qualifies as the resizing
+stress test tests/hash:ip.t calls it.
+
+Signed-off-by: Phil Sutter <phil@nwl.cc>
+Signed-off-by: Jozsef Kadlecsik <kadlec@netfilter.org>
+---
+ tests/resize.sh         |  4 ++--
+ tests/resizec.sh        | 32 +++++++++++++--------------
+ tests/resizen.sh        | 49 ++++++++++++++++++++---------------------
+ tests/resizet.sh        | 40 ++++++++++++++++-----------------
+ tests/setlist_resize.sh |  4 ++--
+ 5 files changed, 64 insertions(+), 65 deletions(-)
+
+diff --git a/tests/resize.sh b/tests/resize.sh
+index 19b93fb01876c..9069b4970e92d 100755
+--- a/tests/resize.sh
++++ b/tests/resize.sh
+@@ -9,6 +9,6 @@ set -e
+ $ipset n resize-test hash:ip hashsize 64
+ for x in `seq 1 32`; do
+    for y in `seq 1 255`; do
+-      $ipset a resize-test 192.168.$x.$y
+-   done
++      echo "a resize-test 192.168.$x.$y"
++   done | $ipset restore
+ done
+diff --git a/tests/resizec.sh b/tests/resizec.sh
+index 28d674769f76f..781acf74c38dd 100755
+--- a/tests/resizec.sh
++++ b/tests/resizec.sh
+@@ -25,65 +25,65 @@ case "$2" in
+     	$ipset n test hash:ip $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y comment "text $ip$x$sep$y"
++    	    	echo "a test $ip$x$sep$y comment \"text $ip$x$sep$y\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipport)
+     	$ipset n test hash:ip,port $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023 "text $ip$x$sep$y,1023"
++    	    	echo "a test $ip$x$sep$y,1023 \"text $ip$x$sep$y,1023\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipportip)
+     	$ipset n test hash:ip,port,ip $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2 comment "text $ip$x$sep$y,1023,$ip2"
++    	    	echo "a test $ip$x$sep$y,1023,$ip2 comment \"text $ip$x$sep$y,1023,$ip2\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipportnet)
+     	$ipset n test hash:ip,port,net $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2/$net comment "text $ip$x$sep$y,1023,$ip2/$net"
++    	    	echo "a test $ip$x$sep$y,1023,$ip2/$net comment \"text $ip$x$sep$y,1023,$ip2/$net\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     net)
+     	$ipset n test hash:net $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net comment "text $ip$x$sep$y/$net"
++    	    	echo "a test $ip$x$sep$y/$net comment \"text $ip$x$sep$y/$net\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     netnet)
+ 	$ipset n test hash:net,net $1 hashsize 64 comment
+ 	for x in `seq 0 16`; do
+ 	    for y in `seq 0 255`; do
+-		$ipset a test $ip$x$sep$y/$net,$ip$y$sep$x/$net comment "text $ip$x$sep$y/$net,$ip$y$sep$x/$net"
++		echo "a test $ip$x$sep$y/$net,$ip$y$sep$x/$net comment \"text $ip$x$sep$y/$net,$ip$y$sep$x/$net\""
+ 	    done
+-	done
++    	done | $ipset restore
+ 	;;
+     netport)
+     	$ipset n test hash:net,port $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,1023 comment "text $ip$x$sep$y/$net,1023"
++    	    	echo "a test $ip$x$sep$y/$net,1023 comment \"text $ip$x$sep$y/$net,1023\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     netiface)
+     	$ipset n test hash:net,iface $1 hashsize 64 comment
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,eth0 comment "text $ip$x$sep$y/$net,eth0"
++    	    	echo "$ipset a test $ip$x$sep$y/$net,eth0 comment \"text $ip$x$sep$y/$net,eth0\""
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+ esac
+ $ipset l test | grep ^$ip | while read x y z; do
+diff --git a/tests/resizen.sh b/tests/resizen.sh
+index 9322bd2a2cfce..13221f7b0894a 100755
+--- a/tests/resizen.sh
++++ b/tests/resizen.sh
+@@ -25,80 +25,79 @@ case "$2" in
+     	$ipset n test hash:ip,port,net $1 hashsize 64
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2/$net nomatch
++    	    	echo "a test $ip$x$sep$y,1023,$ip2/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset t test $ip$x$sep$y,1023,$ip2/$net nomatch 2>/dev/null
++    	    	echo "t test $ip$x$sep$y,1023,$ip2/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore 2>/dev/null
+     	;;
+     netportnet)
+     	$ipset n test hash:net,port,net $1 hashsize 64
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2/$net nomatch
++    	    	echo "a test $ip$x$sep$y,1023,$ip2/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset t test $ip$x$sep$y,1023,$ip2/$net nomatch 2>/dev/null
++    	    	echo "t test $ip$x$sep$y,1023,$ip2/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore 2>/dev/null
+     	;;
+     net)
+     	$ipset n test hash:net $1 hashsize 64
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net nomatch
++    	    	echo "a test $ip$x$sep$y/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset t test $ip$x$sep$y/$net nomatch 2>/dev/null
++    	    	echo "t test $ip$x$sep$y/$net nomatch"
+     	    done
+-    	done
++    	done | $ipset restore 2>/dev/null
+     	;;
+     netnet)
+ 	$ipset n test hash:net,net $1 hashsize 64
+ 	for x in `seq 0 16`; do
+ 	    for y in `seq 0 255`; do
+-		$ipset a test $ip$x$sep$y/$net,$ip$y$sep$x/$net nomatch
++		echo "a test $ip$x$sep$y/$net,$ip$y$sep$x/$net nomatch"
+ 	    done
+-	done
++	done | $ipset restore
+ 	for x in `seq 0 16`; do
+ 	    for y in `seq 0 255`; do
+-		$ipset t test $ip$x$sep$y/$net,$ip$y$sep$x/$net nomatch \
+-		2>/dev/null
++		echo "t test $ip$x$sep$y/$net,$ip$y$sep$x/$net nomatch"
+ 	    done
+-	done
++	done | $ipset restore 2>/dev/null
+ 	;;
+     netport)
+     	$ipset n test hash:net,port $1 hashsize 64
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,1023 nomatch
++    	    	echo "a test $ip$x$sep$y/$net,1023 nomatch"
+     	    done
+-    	done
++    	done | $ipset restore
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset t test $ip$x$sep$y/$net,1023 nomatch 2>/dev/null
++    	    	echo "t test $ip$x$sep$y/$net,1023 nomatch"
+     	    done
+-    	done
++    	done | $ipset restore 2>/dev/null
+     	;;
+     netiface)
+     	$ipset n test hash:net,iface $1 hashsize 64
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,eth0 nomatch
++    	    	echo "a test $ip$x$sep$y/$net,eth0 nomatch"
+     	    done
+-    	done
++    	done | $ipset restore
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset t test $ip$x$sep$y/$net,eth0 nomatch 2>/dev/null
++    	    	echo "t test $ip$x$sep$y/$net,eth0 nomatch"
+     	    done
+-    	done
++    	done | $ipset restore 2>/dev/null
+     	;;
+ esac
+ $ipset x
+diff --git a/tests/resizet.sh b/tests/resizet.sh
+index eed4abf2bd86e..e8fdd732435ab 100755
+--- a/tests/resizet.sh
++++ b/tests/resizet.sh
+@@ -25,81 +25,81 @@ case "$2" in
+     	$ipset n test hash:ip $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y
++    	    	echo "a test $ip$x$sep$y"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipmark)
+     	$ipset n test hash:ip,mark $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023
++    	    	echo "a test $ip$x$sep$y,1023"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipport)
+     	$ipset n test hash:ip,port $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023
++    	    	echo "a test $ip$x$sep$y,1023"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipportip)
+     	$ipset n test hash:ip,port,ip $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2
++    	    	echo "a test $ip$x$sep$y,1023,$ip2"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     ipportnet)
+     	$ipset n test hash:ip,port,net $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y,1023,$ip2/$net
++    	    	echo "a test $ip$x$sep$y,1023,$ip2/$net"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     netportnet)
+     	$ipset n test hash:net,port,net $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 128`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,1023,$ip$y$sep$x/$net
++    	    	echo "a test $ip$x$sep$y/$net,1023,$ip$y$sep$x/$net"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     net)
+     	$ipset n test hash:net $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net
++    	    	echo "a test $ip$x$sep$y/$net"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     netnet)
+ 	$ipset n test hash:net,net $1 hashsize 64 timeout 100
+ 	for x in `seq 0 16`; do
+ 	    for y in `seq 0 255`; do
+-		$ipset a test $ip$x$sep$y/$net,$ip$y$sep$x/$net
++		echo "a test $ip$x$sep$y/$net,$ip$y$sep$x/$net"
+ 	    done
+-	done
++	done | $ipset restore
+ 	;;
+     netport)
+     	$ipset n test hash:net,port $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,1023
++    	    	echo "a test $ip$x$sep$y/$net,1023"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+     netiface)
+     	$ipset n test hash:net,iface $1 hashsize 64 timeout 100
+     	for x in `seq 0 16`; do
+     	    for y in `seq 0 255`; do
+-    	    	$ipset a test $ip$x$sep$y/$net,eth0
++    	    	echo "a test $ip$x$sep$y/$net,eth0"
+     	    done
+-    	done
++    	done | $ipset restore
+     	;;
+ esac
+ $ipset l test | grep ^$ip | while read x y z; do
+diff --git a/tests/setlist_resize.sh b/tests/setlist_resize.sh
+index 1c2be327b841a..acb33e3ba0f08 100755
+--- a/tests/setlist_resize.sh
++++ b/tests/setlist_resize.sh
+@@ -25,9 +25,9 @@ rmmod ip_set >/dev/null 2>&1
+ create() {
+     n=$1
+     while [ $n -le 1024 ]; do
+-      $ipset c test$n hash:ip
++      echo "c test$n hash:ip"
+     	n=$((n+2))
+-    done
++    done | $ipset restore
+ }
+ 
+ for x in `seq 1 $loop`; do
