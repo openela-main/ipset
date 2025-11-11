@@ -3,7 +3,7 @@
 
 Name:             ipset
 Version:          7.22
-Release:          7%{?dist}
+Release:          8%{?dist}
 Summary:          Manage Linux IP sets
 
 License:          GPL-2.0-only
@@ -30,14 +30,7 @@ BuildRequires:    libtool-ltdl-devel
 # explicitly update only one of the two (e.g 'yum update ipset')
 Requires:         %{name}-libs%{?_isa} = %{version}-%{release}
 # RHEL10 moved ipset-specific kernel modules into extra package
-Requires:         (kernel-modules-extra if kernel-core)
-Requires:         (kernel-rt-modules-extra if kernel-rt-core)
-Requires:         (kernel-64k-modules-extra if kernel-64k-core)
-Requires:         (kernel-rt-64k-modules-extra if kernel-rt-64k-core)
-Requires:         (kernel-debug-modules-extra if kernel-debug-core)
-Requires:         (kernel-rt-debug-modules-extra if kernel-rt-debug-core)
-Requires:         (kernel-64k-debug-modules-extra if kernel-64k-debug-core)
-Requires:         (kernel-rt-64k-debug-modules-extra if kernel-rt-64k-debug-core)
+Requires:         kernel-modules-extra-matched
 
 %description
 IP sets are a framework inside the Linux kernel since version 2.4.x, which can
@@ -198,6 +191,9 @@ fi
 
 
 %changelog
+* Tue Apr 22 2025 Phil Sutter <psutter@redhat.com> - 7.22-8
+- Require new kernel-modules-extra-matched meta package
+
 * Mon Mar 17 2025 Eric Garver <egarver@redhat.com> - 7.22-7
 - fix kernel-modules-extra dependency for aarch64 64k variant [RHEL-83582]
 
