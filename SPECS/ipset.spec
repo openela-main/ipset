@@ -3,7 +3,7 @@
 
 Name:             ipset
 Version:          7.22
-Release:          10%{?dist}
+Release:          12%{?dist}
 Summary:          Manage Linux IP sets
 
 License:          GPL-2.0-only
@@ -30,14 +30,15 @@ BuildRequires:    libtool-ltdl-devel
 # explicitly update only one of the two (e.g 'yum update ipset')
 Requires:         %{name}-libs%{?_isa} = %{version}-%{release}
 # RHEL10 moved ipset-specific kernel modules into extra package
-Requires:         (kernel-modules-extra if kernel-modules-core)
-Requires:         (kernel-rt-modules-extra if kernel-rt-modules-core)
-Requires:         (kernel-64k-modules-extra if kernel-64k-modules-core)
-Requires:         (kernel-rt-64k-modules-extra if kernel-rt-64k-modules-core)
-Requires:         (kernel-debug-modules-extra if kernel-debug-modules-core)
-Requires:         (kernel-rt-debug-modules-extra if kernel-rt-debug-modules-core)
-Requires:         (kernel-64k-debug-modules-extra if kernel-64k-debug-modules-core)
-Requires:         (kernel-rt-64k-debug-modules-extra if kernel-rt-64k-debug-modules-core)
+# XXX: All kernel-*-modules-core packages provide kernel-modules-core
+Recommends:       (kernel-modules-extra if (kernel-modules-core unless (kernel-debug-modules-core or kernel-rt-modules-core or kernel-rt-debug-modules-core or kernel-64k-modules-core or kernel-64k-debug-modules-core or kernel-rt-64k-modules-core or kernel-rt-64k-debug-modules-core)))
+Recommends:       (kernel-rt-modules-extra if kernel-rt-modules-core)
+Recommends:       (kernel-64k-modules-extra if kernel-64k-modules-core)
+Recommends:       (kernel-rt-64k-modules-extra if kernel-rt-64k-modules-core)
+Recommends:       (kernel-debug-modules-extra if kernel-debug-modules-core)
+Recommends:       (kernel-rt-debug-modules-extra if kernel-rt-debug-modules-core)
+Recommends:       (kernel-64k-debug-modules-extra if kernel-64k-debug-modules-core)
+Recommends:       (kernel-rt-64k-debug-modules-extra if kernel-rt-64k-debug-modules-core)
 
 %description
 IP sets are a framework inside the Linux kernel since version 2.4.x, which can
@@ -198,6 +199,12 @@ fi
 
 
 %changelog
+* Thu Jun 11 2026 Phil Sutter <psutter@redhat.com> - 7.22-12
+- avoid pulling in kernel package if not needed
+
+* Wed May 27 2026 Phil Sutter <psutter@redhat.com> - 7.22-11
+- spec: Soft-depend on kernel-modules-extra
+
 * Fri Jan 16 2026 Phil Sutter <psutter@redhat.com> - 7.22-10
 - Use modules-core for conditional modules-extra dependency
 
