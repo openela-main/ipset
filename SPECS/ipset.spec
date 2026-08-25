@@ -3,7 +3,7 @@
 
 Name:             ipset
 Version:          7.22
-Release:          12%{?dist}
+Release:          13%{?dist}
 Summary:          Manage Linux IP sets
 
 License:          GPL-2.0-only
@@ -30,8 +30,7 @@ BuildRequires:    libtool-ltdl-devel
 # explicitly update only one of the two (e.g 'yum update ipset')
 Requires:         %{name}-libs%{?_isa} = %{version}-%{release}
 # RHEL10 moved ipset-specific kernel modules into extra package
-# XXX: All kernel-*-modules-core packages provide kernel-modules-core
-Recommends:       (kernel-modules-extra if (kernel-modules-core unless (kernel-debug-modules-core or kernel-rt-modules-core or kernel-rt-debug-modules-core or kernel-64k-modules-core or kernel-64k-debug-modules-core or kernel-rt-64k-modules-core or kernel-rt-64k-debug-modules-core)))
+Recommends:       (kernel-modules-extra if kernel-modules-core)
 Recommends:       (kernel-rt-modules-extra if kernel-rt-modules-core)
 Recommends:       (kernel-64k-modules-extra if kernel-64k-modules-core)
 Recommends:       (kernel-rt-64k-modules-extra if kernel-rt-64k-modules-core)
@@ -199,6 +198,9 @@ fi
 
 
 %changelog
+* Tue Aug 04 2026 Phil Sutter <psutter@redhat.com> - 7.22-13
+- Simplify Recommends again, kernel fixed Provides in modules-core packages
+
 * Thu Jun 11 2026 Phil Sutter <psutter@redhat.com> - 7.22-12
 - avoid pulling in kernel package if not needed
 
